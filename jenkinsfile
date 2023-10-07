@@ -1,0 +1,29 @@
+pipeline {
+    options {
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')
+          }
+    agent any
+  
+    
+    stages {
+        stage('checkoutCode') {
+            steps {
+                git branch: 'main', url: 'https://github.com/anilsoni007/packer_with_jenkins.git'
+            }
+        }
+        
+        stage('packer build') {
+            steps {
+			withCredentials([[
+			$class: 'AmazonWebServicesCredentialsBinding', 
+   			accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
+        		secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+			credentialsId: 'AWS_Cd'
+			]]) {
+		
+			sh 'packer build test.pkr.hcl'
+      			}
+           }
+        }
+    }
+}
